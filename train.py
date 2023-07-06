@@ -128,3 +128,33 @@ plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='val')
 plt.legend()
 plt.savefig('loss_plot.png')
+
+
+### Define prediction models
+reverse_target_word_index = y_tokenizer.index_word
+reverse_source_word_index = x_tokenizer.index_word
+target_word_index = y_tokenizer.word_index
+
+## Encoder
+encoder_model = Model(inputs=encoder_inputs, outputs=[encoder_outputs, state_h, state_c])
+
+## Decoder
+# Tensors to hold the states of the previous time step
+decoder_state_input_h = Input(shape=(latent_dim, ))
+decoder_state_input_c = Input(shape=(latent_dim, ))
+decoder_hidden_state_input = Input(shape=(max_code_len, latent_dim))  # encoded code sequence
+
+# Get the embeddings of the decoder sequence
+dec_emb2 = dec_emb_layer(decoder_inputs) 
+# To predict the next word in the sequence, set the initial states to the states from the previous time step
+(decoder_outputs2, state_h2, state_c2) = decoder_lstm(dec_emb2,
+        initial_state=[decoder_state_input_h, decoder_state_input_c])
+# A dense softmax layer to generate prob dist. over the target vocabulary
+decoder_outputs2 = decoder_dense(decoder_outputs2)
+# Final decoder model
+decoder_model = Model([decoder_inputs] + [decoder_hidden_state_input,
+                      decoder_state_input_h, decoder_state_input_c],
+                      [decoder_outputs2] + [state_h2, state_c2])
+
+encoder_model.save('encoder_model.h5')
+decoder_model.save('decoder_model.h5')
