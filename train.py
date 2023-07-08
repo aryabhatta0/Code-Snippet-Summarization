@@ -1,6 +1,7 @@
 # Do unzip the python_dataset.zip first
-# Set epochs
-num_epochs = 10
+datapath = 'Datasets/python_dataset.csv'
+num_epochs = 10     # Set epochs
+# Check 
 
 import pandas as pd
 import numpy as np
@@ -10,7 +11,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 from preprocess import preprocess, tokenize
 
-df = pd.read_csv("Datasets/python_dataset.csv")
+df = pd.read_csv(datapath)
 df = df[['code', 'docstring']]
 
 ### Preprocessing
